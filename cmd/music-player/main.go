@@ -1,35 +1,29 @@
 package main
 
 import (
-	"music-player/internal/music-player/models"
+	"github.com/julienschmidt/httprouter"
+	"log"
+	"music-player/internal/music-player/handlers"
 	"music-player/internal/music-player/services"
-	"time"
+	"net/http"
 )
 
 func main() {
 
-	song1 := &models.Song{
-		Title:    "1",
-		Author:   "1",
-		Duration: 10 * time.Second,
-	}
-
-	song2 := &models.Song{
-		Title:    "2",
-		Author:   "2",
-		Duration: 10 * time.Second,
-	}
-
 	playlistService := services.NewPlaylistService()
 
-	playlistService.AddSong(song1)
-	playlistService.AddSong(song2)
+	handler := handlers.PlaylistHandler{Service: playlistService}
 
-	go playlistService.Play()
-	time.Sleep(2 * time.Second)
+	go handler.Service.StartListener()
+	router := httprouter.New()
 
-	playlistService.Pause()
-	time.Sleep(2 * time.Second)
-	playlistService.Play()
+	router.POST("/add", handler.AddSong)
+	router.POST("/next", handler.NextSong)
+	router.POST("/prev", handler.PrevSong)
+	router.GET("/play", handler.PlaySong)
+	router.GET("/pause", handler.PauseSong)
+	router.GET("/playlist", handler.ShowPlaylist)
+
+	log.Fatal(http.ListenAndServe(":8080", router))
 
 }
