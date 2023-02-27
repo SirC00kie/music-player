@@ -32,15 +32,11 @@ func (ph *PlaylistHandler) GetSong(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	e := ph.Service.Playlist.SongList.Front()
-	for i := 0; i < index; i++ {
-		e = e.Next()
-		if e == nil {
-			http.NotFound(w, r)
-			return
-		}
+	song, err := ph.Service.GetSong(index)
+	if err != nil {
+		http.NotFound(w, r)
+		return
 	}
-	song := e.Value.(*models.Song)
 
 	songJSON, err := json.Marshal(song)
 	if err != nil {
@@ -60,20 +56,6 @@ func (ph *PlaylistHandler) UpdateSong(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 
-	e := ph.Service.Playlist.SongList.Front()
-	for i := 0; i < index; i++ {
-		e = e.Next()
-		if e == nil {
-			http.NotFound(w, r)
-			return
-		}
-	}
-
-	if ph.Service.Playlist.CurrentSong == e.Value && ph.Service.Playlist.Playing {
-		http.Error(w, "Cannot update current song while playlist is playing", http.StatusConflict)
-		return
-	}
-
 	var song models.Song
 	err = json.NewDecoder(r.Body).Decode(&song)
 	if err != nil {
@@ -81,7 +63,11 @@ func (ph *PlaylistHandler) UpdateSong(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 
-	e.Value = &song
+	err = ph.Service.UpdateSong(index, song)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -93,44 +79,21 @@ func (ph *PlaylistHandler) DeleteSong(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 
-	e := ph.Service.Playlist.SongList.Front()
-	for i := 0; i < index; i++ {
-		e = e.Next()
-		if e == nil {
-			http.NotFound(w, r)
-			return
-		}
-	}
-
-	if ph.Service.Playlist.CurrentSong == e.Value && ph.Service.Playlist.Playing {
-		http.Error(w, "Cannot update current song while playlist is playing", http.StatusConflict)
+	err = ph.Service.DeleteSong(index)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	ph.Service.Playlist.SongList.Remove(e)
 
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (ph *PlaylistHandler) GetPlaylist(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-	var songs []map[string]interface{}
-
-	for e := ph.Service.Playlist.SongList.Front(); e != nil; e = e.Next() {
-		song := e.Value.(*models.Song)
-		songs = append(songs, map[string]interface{}{
-			"title":    song.Title,
-			"author":   song.Author,
-			"duration": song.Duration,
-		})
-	}
-
-	playlistData := map[string]interface{}{
-		"songs":       songs,
-		"startTime":   ph.Service.Playlist.StartTime,
-		"currentTime": ph.Service.Playlist.CurrentTime,
-		"pausedTime":  ph.Service.Playlist.PausedTime,
-		"playing":     ph.Service.Playlist.Playing,
+	playlistData, err := ph.Service.GetPlaylist()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	playlistJSON, err := json.Marshal(playlistData)
@@ -139,6 +102,7 @@ func (ph *PlaylistHandler) GetPlaylist(w http.ResponseWriter, r *http.Request, _
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(playlistJSON)
 }

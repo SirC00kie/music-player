@@ -10,10 +10,11 @@ import (
 
 func main() {
 
-	playlistService := services.NewPlaylistService()
+	playerService := services.NewPlayerService()
+	playlistService := services.NewPlaylistService(playerService.Playlist)
 
+	handlerPlayer := handlers.PlayerHandler{Service: playerService}
 	handlerPlaylist := handlers.PlaylistHandler{Service: playlistService}
-	handlerPlayer := handlers.PlayerHandler{Service: playlistService}
 
 	go handlerPlayer.Service.StartListener()
 	router := httprouter.New()

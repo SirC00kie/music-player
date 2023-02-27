@@ -9,7 +9,7 @@ import (
 )
 
 type PlayerHandler struct {
-	Service *services.PlaylistService
+	Service *services.PlayerService
 }
 
 func (ph *PlayerHandler) NextSong(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
