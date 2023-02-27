@@ -44,12 +44,6 @@ func (ps *PlaylistService) StartListener() {
 				//return err
 			}
 			continue
-		//case <-ps.pauseChan:
-		//	err := ps.Pause()
-		//	if err != nil {
-		//		//return err
-		//	}
-		//	continue
 		case <-ps.nextChan:
 			ps.Playlist.Playing = false
 			err := ps.NextSong()
@@ -95,9 +89,6 @@ func (ps *PlaylistService) Play() error {
 		ps.Playlist.StartTime = time.Now()
 	}
 
-	ps.Playlist.CurrentTime = time.Since(ps.Playlist.StartTime)
-	song := ps.Playlist.CurrentSong.Value.(*models.Song)
-
 	select {
 	case <-ps.pauseChan:
 		err := ps.Pause()
@@ -117,18 +108,23 @@ func (ps *PlaylistService) Play() error {
 			return err
 		}
 		return nil
+	//case <-time.After(durationLeft):
+	//	if ps.Playlist.Playing {
+	//		ps.SendNextCommand()
+	//	}
 	default:
+		ps.Playlist.CurrentTime = time.Since(ps.Playlist.StartTime)
+		song := ps.Playlist.CurrentSong.Value.(*models.Song)
+
 		if ps.Playlist.CurrentTime >= ps.Playlist.CurrentSong.Value.(*models.Song).Duration {
 			ps.SendNextCommand()
 		} else {
 			durationLeft := ps.Playlist.CurrentSong.Value.(*models.Song).Duration - ps.Playlist.CurrentTime
 			fmt.Printf("Now playing: %s by %s. Time left: %v\n", song.Title, song.Author, durationLeft)
-			//time.Sleep(ps.Playlist.CurrentSong.Value.(*models.Song).Duration - ps.Playlist.CurrentTime)
-			time.AfterFunc(durationLeft, func() {
-				if ps.Playlist.Playing {
-					ps.SendNextCommand()
-				}
-			})
+			time.Sleep(ps.Playlist.CurrentSong.Value.(*models.Song).Duration - ps.Playlist.CurrentTime)
+			if ps.Playlist.Playing {
+				ps.SendNextCommand()
+			}
 		}
 	}
 
