@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package api;
+
+service PlayerService {
+  rpc NextSong (NextSongRequest) returns (NextSongResponse) {}
+  rpc PrevSong (PrevSongRequest) returns (PrevSongResponse) {}
+  rpc PlaySong (PlaySongRequest) returns (PlaySongResponse) {}
+  rpc PauseSong (PauseSongRequest) returns (PauseSongResponse) {}
+}
+
+message NextSongRequest {
+}
+
+message NextSongResponse {
+  string message = 1;
+}
+
+message PrevSongRequest {
+}
+
+message PrevSongResponse {
+  string message = 1;
+}
+
+message PlaySongRequest {
+}
+
+message PlaySongResponse {
+  string message = 1;
+}
+
+message PauseSongRequest {
+}
+
+message PauseSongResponse {
+  string message = 1;
+}

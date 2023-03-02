@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/empty.proto";
+
+
+message Song {
+  string title = 1;
+  string author = 2;
+  int64 duration = 3;
+}
+
+service PlaylistService {
+  rpc AddSong(Song) returns (google.protobuf.Empty);
+  rpc GetSong(GetSongRequest) returns (Song);
+  rpc UpdateSong(UpdateSongRequest) returns (google.protobuf.Empty);
+  rpc DeleteSong(DeleteSongRequest) returns (google.protobuf.Empty);
+  rpc GetPlaylist(google.protobuf.Empty) returns (GetPlaylistResponse);
+}
+
+message GetSongRequest{
+  int32 id = 1;
+}
+
+message UpdateSongRequest{
+  int32 id = 1;
+  Song song = 2;
+}
+
+message DeleteSongRequest{
+  int32 id = 1;
+}
+
+message SongList{
+  repeated Song song = 1;
+}
+
+message GetPlaylistResponse{
+  SongList song_list = 1;
+}
