@@ -35,7 +35,7 @@ func (ph *PlayerHandler) PrevSong(w http.ResponseWriter, r *http.Request, _ http
 }
 
 func (ph *PlayerHandler) PlaySong(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	ph.Service.SendPlayCommand()
+	ph.Service.Play()
 	if ph.Service.Playlist.CurrentSong == nil {
 		http.Error(w, "No song is currently playing", http.StatusBadRequest)
 		return

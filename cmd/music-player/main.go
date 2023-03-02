@@ -3,9 +3,20 @@ package main
 import (
 	"github.com/julienschmidt/httprouter"
 	"log"
+	"music-player/internal/music-player/config"
 	"music-player/internal/music-player/handlers"
 	"music-player/internal/music-player/services"
 	"net/http"
+)
+
+const (
+	songsPOST   = "/api/v1/songs"
+	songsURL    = "/api/v1/songs/:index"
+	playlistURL = "/api/v1/playlist"
+	playURL     = "/api/v1/play"
+	pauseURL    = "/api/v1/pause"
+	nextURL     = "/api/v1/next"
+	prevURL     = "/api/v1/prev"
 )
 
 func main() {
@@ -16,19 +27,20 @@ func main() {
 	handlerPlayer := handlers.PlayerHandler{Service: playerService}
 	handlerPlaylist := handlers.PlaylistHandler{Service: playlistService}
 
-	go handlerPlayer.Service.StartListener()
+	cfg := config.GetConfig()
+
 	router := httprouter.New()
 
-	router.POST("/add", handlerPlaylist.AddSong)
-	router.GET("/get/:index", handlerPlaylist.GetSong)
-	router.GET("/playlist", handlerPlaylist.GetPlaylist)
-	router.PUT("/update/:index", handlerPlaylist.UpdateSong)
-	router.DELETE("/delete/:index", handlerPlaylist.DeleteSong)
-	router.POST("/next", handlerPlayer.NextSong)
-	router.POST("/prev", handlerPlayer.PrevSong)
-	router.GET("/play", handlerPlayer.PlaySong)
-	router.GET("/pause", handlerPlayer.PauseSong)
+	router.POST(songsPOST, handlerPlaylist.AddSong)
+	router.GET(songsURL, handlerPlaylist.GetSong)
+	router.PUT(songsURL, handlerPlaylist.UpdateSong)
+	router.DELETE(songsURL, handlerPlaylist.DeleteSong)
+	router.GET(playlistURL, handlerPlaylist.GetPlaylist)
+	router.POST(nextURL, handlerPlayer.NextSong)
+	router.POST(prevURL, handlerPlayer.PrevSong)
+	router.GET(playURL, handlerPlayer.PlaySong)
+	router.GET(pauseURL, handlerPlayer.PauseSong)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(cfg.Listen.Port, router))
 
 }

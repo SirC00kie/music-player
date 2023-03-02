@@ -9,13 +9,12 @@ import (
 )
 
 type PlayerService struct {
-	Playlist         *models.Playlist
-	playChan         chan bool
-	pauseChan        chan bool
-	nextChan         chan bool
-	prevChan         chan bool
-	listenerRunning  bool
-	listenerStopChan chan bool
+	Playlist  *models.Playlist
+	playChan  chan bool
+	pauseChan chan bool
+	nextChan  chan bool
+	prevChan  chan bool
+	stopChan  chan bool
 }
 
 func NewPlayerService() *PlayerService {
@@ -23,45 +22,12 @@ func NewPlayerService() *PlayerService {
 		SongList: list.New(),
 	}
 	return &PlayerService{
-		Playlist:         playlist,
-		playChan:         make(chan bool, 1),
-		pauseChan:        make(chan bool, 1),
-		nextChan:         make(chan bool, 1),
-		prevChan:         make(chan bool, 1),
-		listenerStopChan: make(chan bool, 1),
-	}
-}
-
-func (ps *PlayerService) StartListener() {
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-	for range ticker.C {
-
-		select {
-		case <-ps.playChan:
-			err := ps.Play()
-			if err != nil {
-				//return err
-			}
-			continue
-		case <-ps.nextChan:
-			ps.Playlist.Playing = false
-			err := ps.NextSong()
-			if err != nil {
-				//return err
-			}
-			continue
-		case <-ps.prevChan:
-			ps.Playlist.Playing = false
-			err := ps.PrevSong()
-			if err != nil {
-				//return err
-			}
-			continue
-		case <-ps.listenerStopChan:
-			return
-		}
-
+		Playlist:  playlist,
+		playChan:  make(chan bool, 1),
+		pauseChan: make(chan bool, 1),
+		nextChan:  make(chan bool, 1),
+		prevChan:  make(chan bool, 1),
+		stopChan:  make(chan bool, 1),
 	}
 }
 
@@ -85,44 +51,46 @@ func (ps *PlayerService) Play() error {
 		ps.Playlist.StartTime = time.Now()
 	}
 
-	select {
-	case <-ps.pauseChan:
-		err := ps.Pause()
-		if err != nil {
-			return err
-		}
-		return nil
-	case <-ps.nextChan:
-		err := ps.NextSong()
-		if err != nil {
-			return err
-		}
-		return nil
-	case <-ps.prevChan:
-		err := ps.PrevSong()
-		if err != nil {
-			return err
-		}
-		return nil
-	//case <-time.After(durationLeft):
-	//	if ps.Playlist.Playing {
-	//		ps.SendNextCommand()
-	//	}
-	default:
-		ps.Playlist.CurrentTime = time.Since(ps.Playlist.StartTime)
-		song := ps.Playlist.CurrentSong.Value.(*models.Song)
+	song := ps.Playlist.CurrentSong.Value.(*models.Song)
+	// for trigger event when song finished
+	duration := ps.Playlist.CurrentSong.Value.(*models.Song).Duration - ps.Playlist.PausedTime
+	timer := time.NewTimer(duration)
 
-		if ps.Playlist.CurrentTime >= ps.Playlist.CurrentSong.Value.(*models.Song).Duration {
-			ps.SendNextCommand()
-		} else {
-			durationLeft := ps.Playlist.CurrentSong.Value.(*models.Song).Duration - ps.Playlist.CurrentTime
-			fmt.Printf("Now playing: %s by %s. Time left: %v\n", song.Title, song.Author, durationLeft)
-			time.Sleep(ps.Playlist.CurrentSong.Value.(*models.Song).Duration - ps.Playlist.CurrentTime)
-			if ps.Playlist.Playing {
-				ps.SendNextCommand()
+	fmt.Printf("Now playing: %s by %s. Time left: %v\n", song.Title, song.Author, timer)
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	go func() {
+		fmt.Print("go func")
+		select {
+		case <-timer.C:
+			fmt.Print("timer c")
+			timer.Stop()
+			err := ps.NextSong()
+			if err != nil {
+				return
+			}
+		case <-ps.pauseChan:
+			timer.Stop()
+			ps.Playlist.CurrentTime = time.Since(ps.Playlist.StartTime)
+			err := ps.Pause()
+			if err != nil {
+				return
+			}
+		case <-ps.nextChan:
+			timer.Stop()
+			err := ps.NextSong()
+			if err != nil {
+				return
+			}
+		case <-ps.prevChan:
+			timer.Stop()
+			err := ps.PrevSong()
+			if err != nil {
+				return
 			}
 		}
-	}
+	}()
 
 	return nil
 }
@@ -142,7 +110,6 @@ func (ps *PlayerService) Pause() error {
 func (ps *PlayerService) NextSong() error {
 	ps.Playlist.CurrentTime = 0
 	ps.Playlist.PausedTime = 0
-	ps.Playlist.StartTime = time.Now()
 	ps.Playlist.Playing = false
 
 	if ps.Playlist.SongList.Len() == 0 {
@@ -157,7 +124,10 @@ func (ps *PlayerService) NextSong() error {
 		ps.Playlist.CurrentSong = ps.Playlist.SongList.Front()
 	}
 
-	ps.SendPlayCommand()
+	err := ps.Play()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Next Song")
 	return nil
 }
@@ -165,7 +135,6 @@ func (ps *PlayerService) NextSong() error {
 func (ps *PlayerService) PrevSong() error {
 	ps.Playlist.CurrentTime = 0
 	ps.Playlist.PausedTime = 0
-	ps.Playlist.StartTime = time.Now()
 	ps.Playlist.Playing = false
 
 	if ps.Playlist.SongList.Len() == 0 {
@@ -179,13 +148,12 @@ func (ps *PlayerService) PrevSong() error {
 		ps.Playlist.CurrentSong = ps.Playlist.SongList.Front()
 	}
 
-	ps.SendPlayCommand()
+	err := ps.Play()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Prev Song")
 	return nil
-}
-
-func (ps *PlayerService) SendPlayCommand() {
-	ps.playChan <- true
 }
 
 func (ps *PlayerService) SendPauseCommand() {
