@@ -62,34 +62,62 @@ func (ps *PlayerService) Play() error {
 
 	go func() {
 		fmt.Print("go func")
-		select {
-		case <-timer.C:
-			fmt.Print("timer c")
-			timer.Stop()
-			err := ps.NextSong()
-			if err != nil {
-				return
-			}
-		case <-ps.pauseChan:
-			timer.Stop()
-			ps.Playlist.CurrentTime = time.Since(ps.Playlist.StartTime)
-			err := ps.Pause()
-			if err != nil {
-				return
-			}
-		case <-ps.nextChan:
-			timer.Stop()
-			err := ps.NextSong()
-			if err != nil {
-				return
-			}
-		case <-ps.prevChan:
-			timer.Stop()
-			err := ps.PrevSong()
-			if err != nil {
-				return
+		for {
+			select {
+			case <-timer.C:
+				fmt.Print("timer c")
+				timer.Stop()
+				err := ps.NextSong()
+				if err != nil {
+					return
+				}
+			case <-ps.pauseChan:
+				timer.Stop()
+				ps.Playlist.CurrentTime = time.Since(ps.Playlist.StartTime)
+				err := ps.Pause()
+				if err != nil {
+					return
+				}
+			case <-ps.nextChan:
+				timer.Stop()
+				err := ps.NextSong()
+				if err != nil {
+					return
+				}
+			case <-ps.prevChan:
+				timer.Stop()
+				err := ps.PrevSong()
+				if err != nil {
+					return
+				}
+			default:
+				if ps.Playlist.Playing {
+					continue
+				}
+				select {
+				case <-ps.pauseChan:
+					timer.Stop()
+					ps.Playlist.CurrentTime = time.Since(ps.Playlist.StartTime)
+					err := ps.Pause()
+					if err != nil {
+						return
+					}
+				case <-ps.nextChan:
+					timer.Stop()
+					err := ps.NextSong()
+					if err != nil {
+						return
+					}
+				case <-ps.prevChan:
+					timer.Stop()
+					err := ps.PrevSong()
+					if err != nil {
+						return
+					}
+				}
 			}
 		}
+
 	}()
 
 	return nil

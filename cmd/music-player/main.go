@@ -4,7 +4,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"music-player/internal/music-player/config"
-	"music-player/internal/music-player/handlers"
+	httpHandler "music-player/internal/music-player/handlers/http"
 	"music-player/internal/music-player/services"
 	"net/http"
 )
@@ -24,8 +24,8 @@ func main() {
 	playerService := services.NewPlayerService()
 	playlistService := services.NewPlaylistService(playerService.Playlist)
 
-	handlerPlayer := handlers.PlayerHandler{Service: playerService}
-	handlerPlaylist := handlers.PlaylistHandler{Service: playlistService}
+	handlerPlayer := httpHandler.PlayerHandler{Service: playerService}
+	handlerPlaylist := httpHandler.PlaylistHandler{Service: playlistService}
 
 	cfg := config.GetConfig()
 

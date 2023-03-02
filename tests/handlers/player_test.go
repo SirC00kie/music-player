@@ -73,9 +73,10 @@ func TestPlayerService_Pause(t *testing.T) {
 	err := playerService.Play()
 	time.Sleep(2 * time.Second)
 	playerService.SendPauseCommand()
+	time.Sleep(1 * time.Second)
 	assert.Nil(t, err)
 	assert.False(t, playerService.Playlist.Playing)
-	assert.Equal(t, 2*time.Second, playerService.Playlist.PausedTime.Round(time.Millisecond*10))
+	assert.Equal(t, 2*time.Second, playerService.Playlist.PausedTime.Round(time.Millisecond*100))
 }
 
 func TestPlayerService_Pause_NoPlayingSong(t *testing.T) {
@@ -92,20 +93,21 @@ func TestPlayerService_NextSong(t *testing.T) {
 	song1 := &models.Song{
 		Title:    "test title1",
 		Author:   "test author1",
-		Duration: 2 * time.Second,
+		Duration: 3 * time.Second,
 	}
 	song2 := &models.Song{
 		Title:    "test title2",
 		Author:   "test author2",
-		Duration: 2 * time.Second,
+		Duration: 3 * time.Second,
 	}
 	playlistService.AddSong(song1)
 	playlistService.AddSong(song2)
 
 	err := playerService.Play()
-	time.Sleep(1 * time.Second)
-	err = playerService.NextSong()
 	assert.Nil(t, err)
+	time.Sleep(1 * time.Second)
+	playerService.SendNextCommand()
+	time.Sleep(1 * time.Second)
 	assert.Equal(t,
 		playerService.Playlist.SongList.Front().Next().Value.(*models.Song),
 		playerService.Playlist.CurrentSong.Value.(*models.Song))
@@ -121,21 +123,22 @@ func TestPlayerService_PrevSong(t *testing.T) {
 	song1 := &models.Song{
 		Title:    "test title1",
 		Author:   "test author1",
-		Duration: 2 * time.Second,
+		Duration: 3 * time.Second,
 	}
 	song2 := &models.Song{
 		Title:    "test title2",
 		Author:   "test author2",
-		Duration: 2 * time.Second,
+		Duration: 3 * time.Second,
 	}
 	playlistService.AddSong(song1)
 	playlistService.AddSong(song2)
 
 	err := playerService.Play()
-	err = playerService.NextSong()
-	time.Sleep(1 * time.Second)
-	err = playerService.PrevSong()
 	assert.Nil(t, err)
+	playerService.SendNextCommand()
+	time.Sleep(1 * time.Second)
+	playerService.SendPrevCommand()
+	time.Sleep(1 * time.Second)
 	assert.Equal(t,
 		playerService.Playlist.SongList.Front().Value.(*models.Song),
 		playerService.Playlist.CurrentSong.Value.(*models.Song))

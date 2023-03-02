@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
-	"music-player/internal/music-player/handlers"
+	httpHandler "music-player/internal/music-player/handlers/http"
 	"music-player/internal/music-player/models"
 	"music-player/internal/music-player/services"
 	"net/http"
@@ -19,7 +19,7 @@ func TestPlaylistHandler_AddSong(t *testing.T) {
 		SongList: list.New(),
 	}
 	service := services.NewPlaylistService(playlist)
-	handler := &handlers.PlaylistHandler{Service: service}
+	handler := &httpHandler.PlaylistHandler{Service: service}
 
 	song := &models.Song{
 		Title:    "test title",
@@ -44,7 +44,7 @@ func TestPlaylistHandler_GetSong(t *testing.T) {
 		SongList: list.New(),
 	}
 	service := services.NewPlaylistService(playlist)
-	handler := &handlers.PlaylistHandler{Service: service}
+	handler := &httpHandler.PlaylistHandler{Service: service}
 
 	song := &models.Song{
 		Title:    "test title",
@@ -74,7 +74,7 @@ func TestPlaylistHandler_UpdateSong(t *testing.T) {
 		SongList: list.New(),
 	}
 	service := services.NewPlaylistService(playlist)
-	handler := &handlers.PlaylistHandler{Service: service}
+	handler := &httpHandler.PlaylistHandler{Service: service}
 
 	song := &models.Song{
 		Title:    "test title",
@@ -111,7 +111,7 @@ func TestPlaylistHandler_DeleteSong(t *testing.T) {
 		SongList: list.New(),
 	}
 	service := services.NewPlaylistService(playlist)
-	handler := &handlers.PlaylistHandler{Service: service}
+	handler := &httpHandler.PlaylistHandler{Service: service}
 
 	song := &models.Song{
 		Title:    "test title",
@@ -137,7 +137,7 @@ func TestPlaylistHandler_GetPlaylist(t *testing.T) {
 		SongList: list.New(),
 	}
 	service := services.NewPlaylistService(playlist)
-	handler := &handlers.PlaylistHandler{Service: service}
+	handler := &httpHandler.PlaylistHandler{Service: service}
 
 	song1 := &models.Song{
 		Title:    "test title1",
