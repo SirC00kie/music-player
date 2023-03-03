@@ -2,17 +2,19 @@ syntax = "proto3";
 
 package api;
 
+option go_package = "/gen";
+
 import "google/protobuf/empty.proto";
 
 service PlayerService {
-  rpc NextSong (google.protobuf.Empty) returns (Song) {}
-  rpc PrevSong (google.protobuf.Empty) returns (Song) {}
-  rpc PlaySong (google.protobuf.Empty) returns (Song) {}
-  rpc PauseSong (google.protobuf.Empty) returns (Song) {}
+  rpc NextSong (google.protobuf.Empty) returns (SongResponse) {}
+  rpc PrevSong (google.protobuf.Empty) returns (SongResponse) {}
+  rpc PlaySong (google.protobuf.Empty) returns (SongResponse) {}
+  rpc PauseSong (google.protobuf.Empty) returns (SongResponse) {}
 }
 
 
-message Song {
+message SongResponse {
   string title = 1;
   string author = 2;
   int64 duration = 3;

@@ -30,10 +30,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PlayerServiceClient interface {
-	NextSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Song, error)
-	PrevSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Song, error)
-	PlaySong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Song, error)
-	PauseSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Song, error)
+	NextSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*SongResponse, error)
+	PrevSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*SongResponse, error)
+	PlaySong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*SongResponse, error)
+	PauseSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*SongResponse, error)
 }
 
 type playerServiceClient struct {
@@ -44,8 +44,8 @@ func NewPlayerServiceClient(cc grpc.ClientConnInterface) PlayerServiceClient {
 	return &playerServiceClient{cc}
 }
 
-func (c *playerServiceClient) NextSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Song, error) {
-	out := new(Song)
+func (c *playerServiceClient) NextSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*SongResponse, error) {
+	out := new(SongResponse)
 	err := c.cc.Invoke(ctx, PlayerService_NextSong_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -53,8 +53,8 @@ func (c *playerServiceClient) NextSong(ctx context.Context, in *empty.Empty, opt
 	return out, nil
 }
 
-func (c *playerServiceClient) PrevSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Song, error) {
-	out := new(Song)
+func (c *playerServiceClient) PrevSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*SongResponse, error) {
+	out := new(SongResponse)
 	err := c.cc.Invoke(ctx, PlayerService_PrevSong_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -62,8 +62,8 @@ func (c *playerServiceClient) PrevSong(ctx context.Context, in *empty.Empty, opt
 	return out, nil
 }
 
-func (c *playerServiceClient) PlaySong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Song, error) {
-	out := new(Song)
+func (c *playerServiceClient) PlaySong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*SongResponse, error) {
+	out := new(SongResponse)
 	err := c.cc.Invoke(ctx, PlayerService_PlaySong_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -71,8 +71,8 @@ func (c *playerServiceClient) PlaySong(ctx context.Context, in *empty.Empty, opt
 	return out, nil
 }
 
-func (c *playerServiceClient) PauseSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Song, error) {
-	out := new(Song)
+func (c *playerServiceClient) PauseSong(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*SongResponse, error) {
+	out := new(SongResponse)
 	err := c.cc.Invoke(ctx, PlayerService_PauseSong_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -84,26 +84,26 @@ func (c *playerServiceClient) PauseSong(ctx context.Context, in *empty.Empty, op
 // All implementations should embed UnimplementedPlayerServiceServer
 // for forward compatibility
 type PlayerServiceServer interface {
-	NextSong(context.Context, *empty.Empty) (*Song, error)
-	PrevSong(context.Context, *empty.Empty) (*Song, error)
-	PlaySong(context.Context, *empty.Empty) (*Song, error)
-	PauseSong(context.Context, *empty.Empty) (*Song, error)
+	NextSong(context.Context, *empty.Empty) (*SongResponse, error)
+	PrevSong(context.Context, *empty.Empty) (*SongResponse, error)
+	PlaySong(context.Context, *empty.Empty) (*SongResponse, error)
+	PauseSong(context.Context, *empty.Empty) (*SongResponse, error)
 }
 
 // UnimplementedPlayerServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedPlayerServiceServer struct {
 }
 
-func (UnimplementedPlayerServiceServer) NextSong(context.Context, *empty.Empty) (*Song, error) {
+func (UnimplementedPlayerServiceServer) NextSong(context.Context, *empty.Empty) (*SongResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NextSong not implemented")
 }
-func (UnimplementedPlayerServiceServer) PrevSong(context.Context, *empty.Empty) (*Song, error) {
+func (UnimplementedPlayerServiceServer) PrevSong(context.Context, *empty.Empty) (*SongResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PrevSong not implemented")
 }
-func (UnimplementedPlayerServiceServer) PlaySong(context.Context, *empty.Empty) (*Song, error) {
+func (UnimplementedPlayerServiceServer) PlaySong(context.Context, *empty.Empty) (*SongResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PlaySong not implemented")
 }
-func (UnimplementedPlayerServiceServer) PauseSong(context.Context, *empty.Empty) (*Song, error) {
+func (UnimplementedPlayerServiceServer) PauseSong(context.Context, *empty.Empty) (*SongResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PauseSong not implemented")
 }
 
