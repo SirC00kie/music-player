@@ -9,6 +9,7 @@ import (
 	grpcHandler "music-player/internal/music-player/handlers/grpc"
 	httpHandler "music-player/internal/music-player/handlers/http"
 	"music-player/internal/music-player/services"
+	apiPl "music-player/pkg/api/player"
 	api "music-player/pkg/api/playlist"
 	"net"
 	"net/http"
@@ -25,11 +26,11 @@ const (
 )
 
 type Server struct {
-	Config *config.Config
-	//HandlerPlayerGRPC
+	Config              *config.Config
 	HandlerPlaylistHTTP *httpHandler.PlaylistHandler
 	HandlerPlayerHTTP   *httpHandler.PlayerHandler
-	HandlerPlaylistGRPC *grpcHandler.HandlerGRPC
+	HandlerPlaylistGRPC *grpcHandler.HandlerPlaylistGRPC
+	HandlerPlayerGRPC   *grpcHandler.HandlerPlayerGRPC
 }
 
 func NewServer(p *services.PlayerService, pl *services.PlaylistService, cfg *config.Config) *Server {
@@ -37,13 +38,15 @@ func NewServer(p *services.PlayerService, pl *services.PlaylistService, cfg *con
 		Config:              cfg,
 		HandlerPlayerHTTP:   &httpHandler.PlayerHandler{Service: p},
 		HandlerPlaylistHTTP: &httpHandler.PlaylistHandler{Service: pl},
-		HandlerPlaylistGRPC: &grpcHandler.HandlerGRPC{Service: pl},
+		HandlerPlaylistGRPC: &grpcHandler.HandlerPlaylistGRPC{Service: pl},
+		HandlerPlayerGRPC:   &grpcHandler.HandlerPlayerGRPC{Service: p},
 	}
 }
 
 func (s *Server) RunServer() {
 	grpcServer := grpc.NewServer()
 	api.RegisterPlaylistServiceServer(grpcServer, s.HandlerPlaylistGRPC)
+	apiPl.RegisterPlayerServiceServer(grpcServer, s.HandlerPlayerGRPC)
 
 	listener, err := net.Listen(s.Config.ListenGRPC.Network, s.Config.ListenGRPC.Port)
 	if err != nil {

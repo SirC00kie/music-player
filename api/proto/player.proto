@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package api;
 
-option go_package = "/gen";
-
 import "google/protobuf/empty.proto";
 
 service PlayerService {

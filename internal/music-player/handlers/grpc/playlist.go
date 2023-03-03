@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-type HandlerGRPC struct {
+type HandlerPlaylistGRPC struct {
 	api.PlaylistServiceServer
 	Service *services.PlaylistService
 }
 
-func (h *HandlerGRPC) AddSong(ctx context.Context, req *api.Song) (*empty.Empty, error) {
+func (h *HandlerPlaylistGRPC) AddSong(ctx context.Context, req *api.Song) (*empty.Empty, error) {
 	song := models.Song{
 		Title:    req.Title,
 		Author:   req.Author,
@@ -23,7 +23,7 @@ func (h *HandlerGRPC) AddSong(ctx context.Context, req *api.Song) (*empty.Empty,
 	h.Service.AddSong(&song)
 	return &empty.Empty{}, nil
 }
-func (h *HandlerGRPC) GetSong(ctx context.Context, req *api.GetSongRequest) (*api.Song, error) {
+func (h *HandlerPlaylistGRPC) GetSong(ctx context.Context, req *api.GetSongRequest) (*api.Song, error) {
 	id := req.Id
 	song, err := h.Service.GetSong(int(id))
 	if err != nil {
@@ -35,7 +35,7 @@ func (h *HandlerGRPC) GetSong(ctx context.Context, req *api.GetSongRequest) (*ap
 		Duration: int64(song.Duration),
 	}, nil
 }
-func (h *HandlerGRPC) UpdateSong(ctx context.Context, req *api.UpdateSongRequest) (*empty.Empty, error) {
+func (h *HandlerPlaylistGRPC) UpdateSong(ctx context.Context, req *api.UpdateSongRequest) (*empty.Empty, error) {
 	id := req.Id
 
 	song := models.Song{
@@ -51,7 +51,7 @@ func (h *HandlerGRPC) UpdateSong(ctx context.Context, req *api.UpdateSongRequest
 
 	return &empty.Empty{}, nil
 }
-func (h *HandlerGRPC) DeleteSong(ctx context.Context, req *api.DeleteSongRequest) (*empty.Empty, error) {
+func (h *HandlerPlaylistGRPC) DeleteSong(ctx context.Context, req *api.DeleteSongRequest) (*empty.Empty, error) {
 	id := req.Id
 
 	err := h.Service.DeleteSong(int(id))
@@ -61,7 +61,7 @@ func (h *HandlerGRPC) DeleteSong(ctx context.Context, req *api.DeleteSongRequest
 
 	return &empty.Empty{}, nil
 }
-func (h *HandlerGRPC) GetPlaylist(ctx context.Context, req *empty.Empty) (*api.GetPlaylistResponse, error) {
+func (h *HandlerPlaylistGRPC) GetPlaylist(ctx context.Context, req *empty.Empty) (*api.GetPlaylistResponse, error) {
 	playlistData, err := h.Service.GetPlaylist()
 	if err != nil {
 		return nil, err
