@@ -1,12 +1,16 @@
 package server
 
 import (
+	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"google.golang.org/grpc"
 	"log"
 	"music-player/internal/music-player/config"
 	grpcHandler "music-player/internal/music-player/handlers/grpc"
 	httpHandler "music-player/internal/music-player/handlers/http"
 	"music-player/internal/music-player/services"
+	api "music-player/pkg/api/playlist"
+	"net"
 	"net/http"
 )
 
@@ -38,17 +42,17 @@ func NewServer(p *services.PlayerService, pl *services.PlaylistService, cfg *con
 }
 
 func (s *Server) RunServer() {
-	//grpcServer := grpc.NewServer()
-	//api.RegisterPlaylistServiceServer(grpcServer, s.HandlerPlaylistGRPC)
-	//
-	//listener, err := net.Listen(s.Config.ListenGRPC.Network, s.Config.ListenGRPC.Port)
-	//if err != nil {
-	//	log.Fatalf("Failed to listen: %v", err)
-	//}
-	//err = grpcServer.Serve(listener)
-	//if err != nil {
-	//	fmt.Print(err)
-	//}
+	grpcServer := grpc.NewServer()
+	api.RegisterPlaylistServiceServer(grpcServer, s.HandlerPlaylistGRPC)
+
+	listener, err := net.Listen(s.Config.ListenGRPC.Network, s.Config.ListenGRPC.Port)
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+	}
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		fmt.Print(err)
+	}
 
 	httpRouter := httprouter.New()
 
