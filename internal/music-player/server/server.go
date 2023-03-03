@@ -64,8 +64,8 @@ func (s *Server) RunServer() {
 	httpRouter.PUT(songsURL, s.HandlerPlaylistHTTP.UpdateSong)
 	httpRouter.DELETE(songsURL, s.HandlerPlaylistHTTP.DeleteSong)
 	httpRouter.GET(playlistURL, s.HandlerPlaylistHTTP.GetPlaylist)
-	httpRouter.POST(nextURL, s.HandlerPlayerHTTP.NextSong)
-	httpRouter.POST(prevURL, s.HandlerPlayerHTTP.PrevSong)
+	httpRouter.GET(nextURL, s.HandlerPlayerHTTP.NextSong)
+	httpRouter.GET(prevURL, s.HandlerPlayerHTTP.PrevSong)
 	httpRouter.GET(playURL, s.HandlerPlayerHTTP.PlaySong)
 	httpRouter.GET(pauseURL, s.HandlerPlayerHTTP.PauseSong)
 
