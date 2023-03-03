@@ -2,37 +2,20 @@ syntax = "proto3";
 
 package api;
 
+option go_package = "/gen";
+
+import "google/protobuf/empty.proto";
+
 service PlayerService {
-  rpc NextSong (NextSongRequest) returns (NextSongResponse) {}
-  rpc PrevSong (PrevSongRequest) returns (PrevSongResponse) {}
-  rpc PlaySong (PlaySongRequest) returns (PlaySongResponse) {}
-  rpc PauseSong (PauseSongRequest) returns (PauseSongResponse) {}
+  rpc NextSong (google.protobuf.Empty) returns (Song) {}
+  rpc PrevSong (google.protobuf.Empty) returns (Song) {}
+  rpc PlaySong (google.protobuf.Empty) returns (Song) {}
+  rpc PauseSong (google.protobuf.Empty) returns (Song) {}
 }
 
-message NextSongRequest {
-}
 
-message NextSongResponse {
-  string message = 1;
-}
-
-message PrevSongRequest {
-}
-
-message PrevSongResponse {
-  string message = 1;
-}
-
-message PlaySongRequest {
-}
-
-message PlaySongResponse {
-  string message = 1;
-}
-
-message PauseSongRequest {
-}
-
-message PauseSongResponse {
-  string message = 1;
+message Song {
+  string title = 1;
+  string author = 2;
+  int64 duration = 3;
 }

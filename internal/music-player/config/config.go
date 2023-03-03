@@ -7,11 +7,15 @@ import (
 )
 
 type Config struct {
-	Listen struct {
+	ListenHTTP struct {
 		Type   string `yaml:"type" env-default:"port"`
 		BindIp string `yaml:"bind_ip" env-default:"127.0.0.1"`
 		Port   string `yaml:"port" env-default:"8080"`
-	} `yaml:"listen"`
+	} `yaml:"http_listen"`
+	ListenGRPC struct {
+		Network string `yaml:"network" env-default:"tcp"`
+		Port    string `yaml:"port" env-default:"8080"`
+	} `yaml:"grpc_listen"`
 }
 
 var instance *Config
